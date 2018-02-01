@@ -46,32 +46,31 @@ public class CarouselFragment extends Fragment {
 
     private static CarouselFragment instance = null;
 
-    @SuppressLint("ValidFragment")
-    private CarouselFragment() {
+    public CarouselFragment() {
     }
 
-    public static CarouselFragment getInstance() {
-        if(instance == null) {
-            instance = new CarouselFragment();
-        }
+    public static CarouselFragment newInstance() {
+        instance = new CarouselFragment();
         return instance;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(mListener != null)
+            mListener.getListFilesFromActivity();
+        Log.d("STATE", "create");
 
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        v = inflater.inflate(R.layout.fragment_carousel, container, false);
-        carouselView = (CarouselView) v.findViewById(R.id.carouselView);
-        mListener.getListFilesFromActivity();
+        if(v == null)
+            v = inflater.inflate(R.layout.fragment_carousel, container, false);
+        Log.d("STATE", "createView");
         return v;
     }
-
 
 
     @Override
@@ -96,6 +95,7 @@ public class CarouselFragment extends Fragment {
 
     public void initCarousel(final List<String> files) {
         // GET IMAGE FROM INTERNAL STORAGE
+        carouselView = (CarouselView) v.findViewById(R.id.carouselView);
         carouselView.setImageListener(new ImageListener() {
             @Override
             public void setImageForPosition(int position, ImageView imageView) {
@@ -125,21 +125,21 @@ public class CarouselFragment extends Fragment {
 
                 Bitmap bm = BitmapFactory.decodeFile(files.get(position));
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bm.compress(Bitmap.CompressFormat.JPEG, 100, baos); //bm is the bitmap object
+                bm.compress(Bitmap.CompressFormat.JPEG, 50, baos); //bm is the bitmap object
                 byte[] b = baos.toByteArray();
-                String encodedString = Base64.encodeToString(b, Base64.DEFAULT);
+                String encodedString = Base64.encodeToString(b, Base64.NO_WRAP);
                 int base64Length = encodedString.length();
                 int counter = 0;
                 WebSocketUtil.getInstance().broadcastMessage("start");
                 while(counter < base64Length){
                     WebSocketUtil.getInstance().broadcastMessage(
                             encodedString.substring(counter,
-                                    (counter + 4000) > base64Length ?
+                                    (counter + 10000) > base64Length ?
                                             base64Length :
-                                            (counter + 4000)
+                                            (counter + 10000)
                             )
                     );
-                    counter += 4000;
+                    counter += 10000;
                 }
                 WebSocketUtil.getInstance().broadcastMessage("end");
             }
@@ -153,6 +153,7 @@ public class CarouselFragment extends Fragment {
         carouselView.setSlideInterval(0);
 
     }
+
 
     public interface CarouselInterfaceListener {
 

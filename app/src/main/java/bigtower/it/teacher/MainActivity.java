@@ -1,6 +1,7 @@
 package bigtower.it.teacher;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity
     FilePickerDialog dialog;
     List<String> imagePaths =  new ArrayList<String>();
     Fragment fragment;
+    Fragment[] fragmentsArray = new Fragment[2];
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,19 +68,43 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    public static boolean isFragmentInBackstack(final FragmentManager fragmentManager, final String fragmentTagName) {
+        for (int entry = 0; entry < fragmentManager.getBackStackEntryCount(); entry++) {
+            if (fragmentTagName.equals(fragmentManager.getBackStackEntryAt(entry).getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         if (id == R.id.connection) {
-            fragment = ConnectionFragment.newInstance();
+            if(fragmentsArray[0] == null){
+                fragment = ConnectionFragment.newInstance();
+                fragmentsArray[0] = fragment;
+            }else{
+                fragment = fragmentsArray[0];
+            }
         } else if (id == R.id.carousel) {
-            fragment = CarouselFragment.getInstance();
+            if(fragmentsArray[1] == null){
+                fragment = CarouselFragment.newInstance();
+                fragmentsArray[1] = fragment;
+            }else{
+                fragment = fragmentsArray[1];
+            }
         }
 
+
         FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.replace(R.id.rl, fragment).commit();
+        if(isFragmentInBackstack(getFragmentManager(), item.getTitle().toString())){
+            getFragmentManager().popBackStack(item.getTitle().toString(),0);
+        }else {
+            ft.replace(R.id.rl, fragment).addToBackStack(item.getTitle().toString()).commit();
+        }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
