@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity
     public void getListFiles() {
         DialogProperties properties = new DialogProperties();
         properties.selection_mode = DialogConfigs.SINGLE_MODE;
-        properties.selection_type = DialogConfigs.FILE_AND_DIR_SELECT;
+        properties.selection_type = DialogConfigs.DIR_SELECT;
         properties.root = new File(DialogConfigs.DEFAULT_DIR);
         properties.error_dir = new File(DialogConfigs.DEFAULT_DIR);
         properties.offset = new File(DialogConfigs.DEFAULT_DIR);
